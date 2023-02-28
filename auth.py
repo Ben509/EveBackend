@@ -1,7 +1,6 @@
 from flask import Blueprint, request, session
 from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user
 
 auth = Blueprint('auth', __name__)
 users = db.users

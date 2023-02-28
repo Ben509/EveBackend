@@ -2,7 +2,6 @@ from bson import json_util
 from flask import Blueprint, request
 from db import entries
 import json
-from flask import session
 from middleware import needs_auth
 
 main = Blueprint('main', __name__)
