@@ -1,11 +1,20 @@
-from flask import Blueprint
+from bson import json_util
+from flask import Blueprint, request
+from db import entries
+import json
 
 main = Blueprint('main', __name__)
 
-@main.route('/')
+@main.route('/get-entries/', methods = ['GET'])
 def index():
-    return 'Index'
+    if request.method == "GET":
+        return json_util.dumps(entries.find({}))
 
-@main.route('/profile')
-def profile():
-    return 'Profile'
+@main.route('/create-entry',  methods = ['POST'])
+def set_entry():
+    if request.method == 'POST':
+        start_date = request.form['startDate']
+        end_date = request.form['endDate']
+        symptoms = json.loads(request.form['symptoms'])
+        entries.insert_one({'start_date': start_date, 'end_date': end_date, 'symptoms': symptoms})
+        return "Done"
