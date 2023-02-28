@@ -1,12 +1,21 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user
 
 auth = Blueprint('auth', __name__)
 users = db.users
-@auth.route('/login')
+@auth.route('/login', methods=["POST"])
 def login():
-    return "Login"
+    # login code goes here
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    user = users.find_one({"email": email})
+    if not user or not check_password_hash(user["password"], password):
+        return "Incorrect username or password"
+    session["email"] = email
+    return "Done"
 
 @auth.route('/signup', methods=['POST'])
 def signup():
@@ -23,4 +32,6 @@ def signup():
 
 @auth.route('/logout')
 def logout():
-    return 'Logout'
+    if "email" in session:
+        session.pop("email", None)
+        return "Logged Out"

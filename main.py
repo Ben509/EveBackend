@@ -2,15 +2,19 @@ from bson import json_util
 from flask import Blueprint, request
 from db import entries
 import json
+from flask import session
+from middleware import needs_auth
 
 main = Blueprint('main', __name__)
 
 @main.route('/get-entries/', methods = ['GET'])
+@needs_auth()
 def index():
     if request.method == "GET":
         return json_util.dumps(entries.find({}))
 
 @main.route('/create-entry',  methods = ['POST'])
+@needs_auth()
 def set_entry():
     if request.method == 'POST':
         start_date = request.form['startDate']
