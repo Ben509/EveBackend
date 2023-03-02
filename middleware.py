@@ -8,10 +8,11 @@ def needs_auth():
         @wraps(f)
         def __needs_auth(*args, **kwargs):
             if "email" not in session:
-                return "", 401
+                return {}, 401
             user = users.find_one({"email": session["email"]})
-            if user:
-                return "", 401
+            print(user)
+            if not user:
+                return {}, 401
             result = f(user, *args, **kwargs)
             return result
 
