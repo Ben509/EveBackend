@@ -2,9 +2,9 @@ from flask import Blueprint, request, session
 from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from middleware import needs_auth
+from db import users
 
 auth = Blueprint('auth', __name__)
-users = db.users
 
 
 @auth.route('/login', methods=["POST"])
@@ -35,15 +35,10 @@ def signup():
 
 @auth.route('/profile', methods=['GET'])
 @needs_auth()
-def profile():
-    if "email" in session:
-        email = session["email"]
-        user = users.find_one({"email": email})
-        if user:
-            del user["_id"]
-            del user["password"]
-            return user
-        return "Unauthorized", 401
+def profile(user):
+    del user["_id"]
+    del user["password"]
+    return user
 
 
 @auth.route('/logout')

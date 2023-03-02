@@ -1,5 +1,6 @@
 from flask import session
 from functools import wraps
+from db import users
 
 
 def needs_auth():
@@ -8,7 +9,10 @@ def needs_auth():
         def __needs_auth(*args, **kwargs):
             if "email" not in session:
                 return "", 401
-            result = f(*args, **kwargs)
+            user = users.find_one({"email": session["email"]})
+            if user:
+                return "", 401
+            result = f(user, *args, **kwargs)
             return result
 
         return __needs_auth
