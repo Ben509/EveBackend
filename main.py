@@ -6,13 +6,15 @@ from middleware import needs_auth
 
 main = Blueprint('main', __name__)
 
-@main.route('/get-entries/', methods = ['GET'])
+
+@main.route('/get-entries/', methods=['GET'])
 @needs_auth()
 def index():
     if request.method == "GET":
         return json_util.dumps(entries.find({}))
 
-@main.route('/create-entry',  methods = ['POST'])
+
+@main.route('/create-entry', methods=['POST'])
 @needs_auth()
 def set_entry():
     if request.method == 'POST':
@@ -20,4 +22,4 @@ def set_entry():
         end_date = request.form['endDate']
         symptoms = json.loads(request.form['symptoms'])
         entries.insert_one({'start_date': start_date, 'end_date': end_date, 'symptoms': symptoms})
-        return "Done"
+        return {"message": "Done"}

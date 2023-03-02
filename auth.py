@@ -1,20 +1,23 @@
 from flask import Blueprint, request, session
 from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from middleware import needs_auth
 
 auth = Blueprint('auth', __name__)
 users = db.users
+
+
 @auth.route('/login', methods=["POST"])
 def login():
     # login code goes here
     email = request.form.get('email')
     password = request.form.get('password')
-
     user = users.find_one({"email": email})
     if not user or not check_password_hash(user["password"], password):
-        return "Incorrect username or password"
+        return "Incorrect username or password", 401
     session["email"] = email
-    return "Done"
+    return {"message": "Done"}
+
 
 @auth.route('/signup', methods=['POST'])
 def signup():
@@ -24,13 +27,27 @@ def signup():
         password = request.form.get('password')
         user = users.find_one({"email": email})
         if user:
-            return "Account already exists"
+            return "Account already exists", 400
         new_user = {"email": email, "name": name, "password": generate_password_hash(password, method='sha256')}
         users.insert_one(new_user)
-        return "Done"
+        return {"message": "Done"}
+
+
+@auth.route('/profile', methods=['GET'])
+@needs_auth()
+def profile():
+    if "email" in session:
+        email = session["email"]
+        user = users.find_one({"email": email})
+        if user:
+            del user["_id"]
+            del user["password"]
+            return user
+        return "Unauthorized", 401
+
 
 @auth.route('/logout')
 def logout():
     if "email" in session:
         session.pop("email", None)
-        return "Logged Out"
+        return {"message": "Logged out"}
